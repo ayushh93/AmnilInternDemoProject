@@ -395,11 +395,11 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel5.Controls.Add(this.btnDelete, 1, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(8, 333);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(8, 353);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(840, 48);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(964, 48);
             this.tableLayoutPanel5.TabIndex = 6;
             // 
             // btnDelete
@@ -407,9 +407,9 @@
             this.btnDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDelete.BackColor = System.Drawing.Color.Silver;
             this.btnDelete.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDelete.Location = new System.Drawing.Point(694, 6);
+            this.btnDelete.Location = new System.Drawing.Point(796, 6);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(143, 35);
+            this.btnDelete.Size = new System.Drawing.Size(165, 35);
             this.btnDelete.TabIndex = 0;
             this.btnDelete.Text = "Delete";
             this.btnDelete.UseVisualStyleBackColor = false;
@@ -426,7 +426,7 @@
             this.dgvSupplier.Location = new System.Drawing.Point(8, 63);
             this.dgvSupplier.Name = "dgvSupplier";
             this.dgvSupplier.RowTemplate.Height = 25;
-            this.dgvSupplier.Size = new System.Drawing.Size(840, 264);
+            this.dgvSupplier.Size = new System.Drawing.Size(964, 284);
             this.dgvSupplier.TabIndex = 5;
             this.dgvSupplier.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSupplier_CellDoubleClick);
             // 
@@ -444,7 +444,7 @@
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(840, 51);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(964, 51);
             this.tableLayoutPanel4.TabIndex = 4;
             // 
             // lblSupplierList
@@ -453,7 +453,7 @@
             this.lblSupplierList.AutoSize = true;
             this.lblSupplierList.Font = new System.Drawing.Font("Segoe UI Semibold", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblSupplierList.ForeColor = System.Drawing.Color.Blue;
-            this.lblSupplierList.Location = new System.Drawing.Point(346, 9);
+            this.lblSupplierList.Location = new System.Drawing.Point(407, 9);
             this.lblSupplierList.Name = "lblSupplierList";
             this.lblSupplierList.Size = new System.Drawing.Size(147, 32);
             this.lblSupplierList.TabIndex = 2;
@@ -464,9 +464,9 @@
             this.btnRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnRefresh.BackColor = System.Drawing.Color.Silver;
             this.btnRefresh.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnRefresh.Location = new System.Drawing.Point(717, 8);
+            this.btnRefresh.Location = new System.Drawing.Point(821, 8);
             this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(120, 35);
+            this.btnRefresh.Size = new System.Drawing.Size(140, 35);
             this.btnRefresh.TabIndex = 3;
             this.btnRefresh.Text = "Refresh";
             this.btnRefresh.UseVisualStyleBackColor = false;

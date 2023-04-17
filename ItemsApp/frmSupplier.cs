@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Windows.Forms;
 
 namespace ItemsApp
@@ -188,7 +189,6 @@ namespace ItemsApp
         }
 
         #endregion
-
         private void dgvSupplier_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             //clear all the previous controls
@@ -280,125 +280,104 @@ namespace ItemsApp
             {
                 return;
             }
-            try
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                //Insert into pl_object table first
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                connection.Open();
+                SqlTransaction submitTransaction = connection.BeginTransaction();
+                try
                 {
-                    using (SqlCommand cmd = connection.CreateCommand())
+                    /*UNIQUE VALIDATION FOR NAME STARTS*/
+                    SqlCommand uniqueQuery = new SqlCommand("SELECT name FROM pl_object WHERE object_name = 'Supplier' AND name = @name", connection, submitTransaction);
+                    uniqueQuery.Parameters.AddWithValue("@name", txtName.Text);
+                    SqlDataAdapter nameCheck = new SqlDataAdapter(uniqueQuery);
+                    DataTable nameTable = new DataTable();
+                    nameCheck.Fill(nameTable);
+                    if (nameTable.Rows.Count > 0)
                     {
-                        //Unique validation for name starts
-                        SqlCommand query = new SqlCommand("SELECT name FROM pl_object WHERE object_name = 'Supplier' AND name = @name", connection);
-                        query.Parameters.AddWithValue("@name", txtName.Text);
-                        SqlDataAdapter nameCheck = new SqlDataAdapter(query);
-                        DataTable nameTable = new DataTable();
-                        nameCheck.Fill(nameTable);
-                        if (nameTable.Rows.Count > 0)
-                        {
-                            MessageBox.Show("Supplier Name already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        //Unique validation for name ends
-                        cmd.CommandText = "INSERT INTO pl_object(object_name, name) VALUES(@objectName, @name)";
-                        cmd.Parameters.AddWithValue("@objectName", "Supplier");
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
+                        MessageBox.Show("Supplier Name already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
-                }
+                    /*UNIQUE VALIDATION FOR NAME ENDS*/
 
-                //Retrieve id of object for assigning foreign key in child tables
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
-                        cmd.CommandText = "SELECT MAX(id) FROM pl_object";
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        _id = (int)cmd.ExecuteScalar();
-                        connection.Close();
-                    }
-                }
+                    /*INSERT OBJECT STARTS*/
+                    SqlCommand insertObjectQuery = new SqlCommand("INSERT INTO pl_object(object_name, name) VALUES(@objectName, @name)", connection, submitTransaction);
+                    insertObjectQuery.Parameters.AddWithValue("@objectName", "Supplier");
+                    insertObjectQuery.Parameters.AddWithValue("@name", txtName.Text);
+                    insertObjectQuery.ExecuteNonQuery();
+                    /*INSERT OBJECT ENDS*/
 
-                //Insert into child tables of pl_object
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
+                    /*RETRIEVE ID OF OBJECT FOR ASSIGNING FOREIGN KEY IN CHILD TABLES*/
+                    SqlCommand objectIdQuery = new SqlCommand("SELECT MAX(id) FROM pl_object", connection, submitTransaction);
+                    objectIdQuery.Parameters.AddWithValue("@name", txtName.Text);
+                    _id = (int)objectIdQuery.ExecuteScalar();
+                    /*RETRIEVE ID OF OBJECT FOR ASSIGNING FOREIGN KEY IN CHILD TABLES*/
 
-                        cmd.CommandText = "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType1, @value1)" + "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType2, @value2)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType3, @value3)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType4, @value4)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType5, @value5)";
+                    /*INSERT INTO CHILD TABLES OF PL_OBJECT STARTS*/
+                    SqlCommand insertValueQuery = new SqlCommand("INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType1, @value1)" + "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType2, @value2)" +
+                      "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType3, @value3)" +
+                      "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType4, @value4)" +
+                      "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType5, @value5)", connection, submitTransaction);
 
-                        cmd.Parameters.AddWithValue("@pid", _id);
+                    insertValueQuery.Parameters.AddWithValue("@pid", _id);
 
-                        //* STRING data parameters starts*//*
-                        //Email
-                        cmd.Parameters.AddWithValue("@columnType1", "supplier_email");
-                        cmd.Parameters.AddWithValue("@value1", txtEmail.Text);
-                        //Contact Number
-                        cmd.Parameters.AddWithValue("@columnType2", "supplier_contact_number");
-                        cmd.Parameters.AddWithValue("@value2", txtContactNumber.Text);
-                        //Country
-                        cmd.Parameters.AddWithValue("@columnType3", "supplier_country");
-                        cmd.Parameters.AddWithValue("@value3", txtCountry.Text);
-                        //Address
-                        cmd.Parameters.AddWithValue("@columnType4", "supplier_address");
-                        cmd.Parameters.AddWithValue("@value4", txtAddress.Text);
-                        //Postal Code
-                        cmd.Parameters.AddWithValue("@columnType5", "supplier_postal_code");
-                        cmd.Parameters.AddWithValue("@value5", txtPostalCode.Text);
-                        //* STRING data parameters ends*/
+                    /* STRING DATA PARAMETERS STARTS*/
+                    //EMAIL
+                    insertValueQuery.Parameters.AddWithValue("@columnType1", "supplier_email");
+                    insertValueQuery.Parameters.AddWithValue("@value1", txtEmail.Text);
+                    //CONTACT NUMBER
+                    insertValueQuery.Parameters.AddWithValue("@columnType2", "supplier_contact_number");
+                    insertValueQuery.Parameters.AddWithValue("@value2", txtContactNumber.Text);
+                    //COUNTRY
+                    insertValueQuery.Parameters.AddWithValue("@columnType3", "supplier_country");
+                    insertValueQuery.Parameters.AddWithValue("@value3", txtCountry.Text);
+                    //ADDRESS
+                    insertValueQuery.Parameters.AddWithValue("@columnType4", "supplier_address");
+                    insertValueQuery.Parameters.AddWithValue("@value4", txtAddress.Text);
+                    //POSTAL CODE
+                    insertValueQuery.Parameters.AddWithValue("@columnType5", "supplier_postal_code");
+                    insertValueQuery.Parameters.AddWithValue("@value5", txtPostalCode.Text);
+                    /* STRING DATA PARAMETERS ENDS*/
+                    insertValueQuery.ExecuteNonQuery();
+                    /*INSERT INTO CHILD TABLES OF PL_OBJECT ENDS*/
 
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
-                    }
-                }
-                MessageBox.Show("Supplier created succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                //Insert into manufacturer_supplier pivot table
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    // Open the connection
-                    connection.Open();
-
-                    // Loop through the checked items in the checklistbox
+                    /*INSERT INTO MANUFACTURER_SUPPLIER PIVOT TABLE STARTS*/
                     foreach (DataRowView item in clbManufacturer.CheckedItems)
                     {
-                        // Get the manufacturer ID from the selected item
+                        // GET THE MANUFACTURER ID FROM THE SELECTED ITEM
                         int manufacturerId = Convert.ToInt32(item["id"]);
 
-                        // Create a new SQL command to insert the manufacturer ID into the table
-                        SqlCommand command = new SqlCommand("INSERT INTO manufacturer_supplier (manufacturer_id, supplier_id) VALUES (@manufacturer_id, @supplier_id)", connection);
-                        command.Parameters.AddWithValue("@manufacturer_id", manufacturerId);
-                        command.Parameters.AddWithValue("@supplier_id", _id);
+                        // CREATE A NEW SQL COMMAND TO INSERT THE MANUFACTURER ID INTO THE TABLE
+                        SqlCommand relationQuery = new SqlCommand("INSERT INTO manufacturer_supplier (manufacturer_id, supplier_id) VALUES (@manufacturer_id, @supplier_id)", connection, submitTransaction);
+                        relationQuery.Parameters.AddWithValue("@manufacturer_id", manufacturerId);
+                        relationQuery.Parameters.AddWithValue("@supplier_id", _id);
 
-                        // Execute the SQL command
-                        command.ExecuteNonQuery();
+                        relationQuery.ExecuteNonQuery();
                     }
+                    /*INSERT INTO MANUFACTURER_SUPPLIER PIVOT TABLE ENDS*/
 
-                    // Close the connection
-                    connection.Close();
+                    //EXECUTE THE TRANSACTION
+                    submitTransaction.Commit();
+                    MessageBox.Show("Supplier created succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Supplier could not be created! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                //redirect to tabPage2
-                tabControl1.SelectedTab = tabPage2;
-                //refresh data in datagridview
-                LoadData();
-                //clearcontrols
-                foreach (Control c in tableLayoutPanel2.Controls)
+                catch (Exception ex)
                 {
-                    clearControls(c);
+                    submitTransaction.Rollback();
+                    MessageBox.Show($"Supplier could not be created! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    connection.Close();
+                    //REDIRECT TO TABPAGE2
+                    tabControl1.SelectedTab = tabPage2;
+                    //REFRESH DATA IN DATAGRIDVIEW
+                    LoadData();
+                    //CLEARCONTROLS
+                    foreach (Control c in tableLayoutPanel2.Controls)
+                    {
+                        clearControls(c);
+                    }
                 }
             }
 
@@ -410,7 +389,7 @@ namespace ItemsApp
 
         }
 
-        private void btnUpdate_Click(object sender, EventArgs e)
+        private void btnUpdate_Click(object sender, EventArgs e) 
         {
             if (!ValidateData())
             {
@@ -423,122 +402,114 @@ namespace ItemsApp
             }
             if (MessageBox.Show("Do you want to update this supplier?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 return;
-            try
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                // Insert into pl_object table first
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                connection.Open();
+                SqlTransaction updateTransaction = connection.BeginTransaction();
+                try
                 {
-                    using (SqlCommand cmd = connection.CreateCommand())
+                    /*UNIQUE VALIDATION FOR NAME STARTS*/
+                    SqlCommand uniqueQuery = new SqlCommand("SELECT name FROM pl_object WHERE object_name = 'Supplier' AND name = @name AND id != @id", connection, updateTransaction);
+                    uniqueQuery.Parameters.AddWithValue("@id", _id);
+                    uniqueQuery.Parameters.AddWithValue("@name", txtName.Text);
+                    SqlDataAdapter nameCheck = new SqlDataAdapter(uniqueQuery);
+                    DataTable nameTable = new DataTable();
+                    nameCheck.Fill(nameTable);
+                    if (nameTable.Rows.Count > 0)
                     {
-                        //Unique validation for name starts
-                        SqlCommand query = new SqlCommand("SELECT name FROM pl_object WHERE object_name = 'Supplier' AND name = @name AND id != @id", connection);
-                        query.Parameters.AddWithValue("@id", _id);
-                        query.Parameters.AddWithValue("@name", txtName.Text);
-                        SqlDataAdapter nameCheck = new SqlDataAdapter(query);
-                        DataTable nameTable = new DataTable();
-                        nameCheck.Fill(nameTable);
-                        if (nameTable.Rows.Count > 0)
-                        {
-                            MessageBox.Show("Supplier Name already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        //Unique validation for name ends
-
-                        cmd.CommandText = "UPDATE pl_object SET name = @name WHERE id = @id ";
-                        cmd.Parameters.AddWithValue("@id", _id);
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
+                        MessageBox.Show("Supplier Name already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
-                }
-                //Insert into child tables of pl_object
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
+                    /*UNIQUE VALIDATION FOR NAME ENDS*/
 
-                        cmd.CommandText = "UPDATE pl_string SET value = @value1 WHERE pid = @pid AND column_type = @columnType1 " +
+                    /*UPDATE OBJECT STARTS*/
+                    SqlCommand updateObjectQuery = new SqlCommand("UPDATE pl_object SET name = @name WHERE id = @id ", connection, updateTransaction);
+                    updateObjectQuery.Parameters.AddWithValue("@id", _id);
+                    updateObjectQuery.Parameters.AddWithValue("@name", txtName.Text);
+                    updateObjectQuery.ExecuteNonQuery();
+                    /*UPDATE OBJECT ENDS*/
+
+                    /*UPDATE INTO CHILD TABLES OF PL_OBJECT STARTS*/
+                    SqlCommand updateValueQuery = new SqlCommand("UPDATE pl_string SET value = @value1 WHERE pid = @pid AND column_type = @columnType1 " +
                             "UPDATE pl_string SET value = @value2 WHERE pid = @pid AND column_type = @columnType2 " +
                             "UPDATE pl_string SET value = @value3 WHERE pid = @pid AND column_type = @columnType3 " +
                             "UPDATE pl_string SET value = @value4 WHERE pid = @pid AND column_type = @columnType4 " +
-                            "UPDATE pl_string SET value = @value5 WHERE pid = @pid AND column_type = @columnType5 ";
+                            "UPDATE pl_string SET value = @value5 WHERE pid = @pid AND column_type = @columnType5 ", connection, updateTransaction);
 
-                        cmd.Parameters.AddWithValue("@pid", _id);
+                    updateValueQuery.Parameters.AddWithValue("@pid", _id);
 
-                        //* STRING data parameters starts*//*
-                        //Email
-                        cmd.Parameters.AddWithValue("@columnType1", "supplier_email");
-                        cmd.Parameters.AddWithValue("@value1", txtEmail.Text);
-                        //Contact Number
-                        cmd.Parameters.AddWithValue("@columnType2", "supplier_contact_number");
-                        cmd.Parameters.AddWithValue("@value2", txtContactNumber.Text);
-                        //Country
-                        cmd.Parameters.AddWithValue("@columnType3", "supplier_country");
-                        cmd.Parameters.AddWithValue("@value3", txtCountry.Text);
-                        //Address
-                        cmd.Parameters.AddWithValue("@columnType4", "supplier_address");
-                        cmd.Parameters.AddWithValue("@value4", txtAddress.Text);
-                        //Postal Code
-                        cmd.Parameters.AddWithValue("@columnType5", "supplier_postal_code");
-                        cmd.Parameters.AddWithValue("@value5", txtPostalCode.Text);
-                        //* STRING data parameters ends*/
+                    /* STRING DATA PARAMETERS STARTS*/
+                    //EMAIL
+                    updateValueQuery.Parameters.AddWithValue("@columnType1", "supplier_email");
+                    updateValueQuery.Parameters.AddWithValue("@value1", txtEmail.Text);
+                    //CONTACT NUMBER
+                    updateValueQuery.Parameters.AddWithValue("@columnType2", "supplier_contact_number");
+                    updateValueQuery.Parameters.AddWithValue("@value2", txtContactNumber.Text);
+                    //COUNTRY
+                    updateValueQuery.Parameters.AddWithValue("@columnType3", "supplier_country");
+                    updateValueQuery.Parameters.AddWithValue("@value3", txtCountry.Text);
+                    //ADDRESS
+                    updateValueQuery.Parameters.AddWithValue("@columnType4", "supplier_address");
+                    updateValueQuery.Parameters.AddWithValue("@value4", txtAddress.Text);
+                    //POSTAL CODE
+                    updateValueQuery.Parameters.AddWithValue("@columnType5", "supplier_postal_code");
+                    updateValueQuery.Parameters.AddWithValue("@value5", txtPostalCode.Text);
+                    /* STRING DATA PARAMETERS ENDS*/
 
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
-                    }
-                }
-                MessageBox.Show("Supplier updated succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    updateValueQuery.ExecuteNonQuery();
+                    /*UPDATE INTO CHILD TABLES OF PL_OBJECT ENDS*/
 
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
 
-                    // First, delete all existing records for the supplier in the pivot table starts
-                    SqlCommand deleteCommand = new SqlCommand("DELETE FROM manufacturer_supplier WHERE supplier_id = @supplierId", connection);
+                    /*UPDATE PIVOT TABLE MANUFACTURER_SUPPLIER STARTS*/
+
+                    // FIRST, DELETE ALL EXISTING RECORDS FOR THE SUPPLIER IN THE PIVOT TABLE STARTS
+                    SqlCommand deleteCommand = new SqlCommand("DELETE FROM manufacturer_supplier WHERE supplier_id = @supplierId", connection, updateTransaction);
                     deleteCommand.Parameters.AddWithValue("@supplierId", _id);
                     deleteCommand.ExecuteNonQuery();
-                    // First, delete all existing records for the supplier in the pivot table ends
 
 
-                    //Insert into manufacturer_supplier pivot table starts
-                        // Loop through the checked items in the checklistbox
+                    /*INSERT INTO MANUFACTURER_SUPPLIER PIVOT TABLE STARTS*/
+
+                    // LOOP THROUGH THE CHECKED ITEMS IN THE CHECKLISTBOX
                     foreach (DataRowView item in clbManufacturer.CheckedItems)
                     {
-                        // Get the manufacturer ID from the selected item
+                        // GET THE MANUFACTURER ID FROM THE SELECTED ITEM
                         int manufacturerId = Convert.ToInt32(item["id"]);
-                        //clbManufacturer.SetItemChecked(9, true );
-                        // Create a new SQL command to insert the manufacturer ID into the table
-                        SqlCommand command = new SqlCommand("INSERT INTO manufacturer_supplier (manufacturer_id, supplier_id) VALUES (@manufacturer_id, @supplier_id)", connection);
+                        // CREATE A NEW SQL COMMAND TO INSERT THE MANUFACTURER ID INTO THE TABLE
+                        SqlCommand command = new SqlCommand("INSERT INTO manufacturer_supplier (manufacturer_id, supplier_id) VALUES (@manufacturer_id, @supplier_id)", connection, updateTransaction);
                         command.Parameters.AddWithValue("@manufacturer_id", manufacturerId);
                         command.Parameters.AddWithValue("@supplier_id", _id);
 
-                        // Execute the SQL command
                         command.ExecuteNonQuery();
                     }
-                    //Insert into manufacturer_supplier pivot table ends
+                    /*INSERT INTO MANUFACTURER_SUPPLIER PIVOT TABLE ENDS*/
+
+                    /*UPDATE PIVOT TABLE MANUFACTURER_SUPPLIER ENDS*/
 
 
-                    // Close the connection
-                    connection.Close();
+                    //EXECUTE THE TRANSACTION
+                    updateTransaction.Commit();
+                    MessageBox.Show("Supplier updated succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Supplier could not be updated! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                //redirect to tabPage2
-                tabControl1.SelectedTab = tabPage2;
-                //refresh data in datagridview
-                LoadData();
-                //clearcontrols
-                foreach (Control c in tableLayoutPanel2.Controls)
+                catch (Exception ex)
                 {
-                    clearControls(c);
+                    updateTransaction.Rollback();
+                    MessageBox.Show($"Supplier could not be updated! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    connection.Close();
+
+                    //redirect to tabPage2
+                    tabControl1.SelectedTab = tabPage2;
+                    //refresh data in datagridview
+                    LoadData();
+                    //clearcontrols
+                    foreach (Control c in tableLayoutPanel2.Controls)
+                    {
+                        clearControls(c);
+                    }
                 }
             }
 
@@ -554,35 +525,36 @@ namespace ItemsApp
                 if (MessageBox.Show($"Are you sure you want to delete this supplier? \r\n  {_name}", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
                     return;
 
-                try
-                {
-                    using (SqlConnection connection = new SqlConnection(connectionString))
-                    {
-                        using (SqlCommand cmd = connection.CreateCommand())
-                        {
-                            cmd.CommandText = " DELETE FROM pl_string WHERE pid = @id " +
-                                " DELETE FROM pl_object WHERE id=@id ";
-                            cmd.Parameters.AddWithValue("@id", _id);
-                            connection.Open();
-                            cmd.ExecuteNonQuery();
-                            //delete rows in pivot table starts
-                            SqlCommand deletequery = new SqlCommand("DELETE FROM manufacturer_supplier WHERE supplier_id = @id", connection);
-                            deletequery.Parameters.AddWithValue("@id", _id);
-                            deletequery.ExecuteNonQuery();
-                            //delete rows in pivot table ends
 
-                            connection.Close();
-                        }
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlTransaction deleteTransaction = connection.BeginTransaction();
+                    try
+                    {
+                        SqlCommand deletequery = new SqlCommand(" DELETE FROM pl_string WHERE pid = @id " + " DELETE FROM pl_object WHERE id=@id ", connection, deleteTransaction);
+                        deletequery.Parameters.AddWithValue("@id", _id);
+                        deletequery.ExecuteNonQuery();
+                        /*delete rows in pivot table starts*/
+                        SqlCommand deleterelation = new SqlCommand("DELETE FROM manufacturer_supplier WHERE supplier_id = @id", connection, deleteTransaction);
+                        deleterelation.Parameters.AddWithValue("@id", _id);
+                        deleterelation.ExecuteNonQuery();
+                        /*delete rows in pivot table ends*/
+                        deleteTransaction.Commit();
+                        MessageBox.Show("Supplier Deleted Succesfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                     }
-                    MessageBox.Show("Supplier Deleted Succesfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Supplier could not be deleted at the moment! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                finally
-                {
-                    LoadData();
+
+                    catch (Exception ex)
+                    {
+                        deleteTransaction.Rollback();
+                        MessageBox.Show($"Supplier could not be deleted at the moment! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        LoadData();
+                        connection.Close();
+                    }
                 }
             }
         }
