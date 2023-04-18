@@ -212,12 +212,6 @@ namespace ItemsApp
             cmbDesignation.ValueMember = "desig_id";
             cmbDesignation.SelectedIndex = -1;
         }
-        private void btnAddRole_Click(object sender, EventArgs e)
-        {
-            frmAddMore addMore = new frmAddMore();
-            addMore.Show();
-        
-        }
         public void clearUpdateControls(Control c)
         {
             if (c is TextBox tb)
@@ -305,7 +299,6 @@ namespace ItemsApp
             btnUpdate.Enabled = true;
             btnDelete.Enabled = true;
             btnSubmit.Enabled = false;
-            btnAddRole.Enabled = false;
 
             userId = Convert.ToInt32(ugUserList.Rows[e.RowIndex].Cells[0].Value.ToString());
             txtName.Text = ugUserList.Rows[e.RowIndex].Cells[1].Value.ToString();
