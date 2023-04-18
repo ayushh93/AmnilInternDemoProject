@@ -111,16 +111,17 @@
             // 
             this.ugRoleList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ugRoleList.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.ugRoleList.Location = new System.Drawing.Point(3, 473);
+            this.ugRoleList.Location = new System.Drawing.Point(3, 211);
             this.ugRoleList.Name = "ugRoleList";
             this.ugRoleList.RowHeadersWidth = 51;
             this.ugRoleList.RowTemplate.Height = 29;
-            this.ugRoleList.Size = new System.Drawing.Size(849, 118);
+            this.ugRoleList.Size = new System.Drawing.Size(849, 380);
             this.ugRoleList.TabIndex = 5;
+            this.ugRoleList.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ugRoleList_CellContentDoubleClick);
             // 
             // btnUpdateRole
             // 
-            this.btnUpdateRole.Location = new System.Drawing.Point(651, 341);
+            this.btnUpdateRole.Location = new System.Drawing.Point(732, 159);
             this.btnUpdateRole.Name = "btnUpdateRole";
             this.btnUpdateRole.Size = new System.Drawing.Size(94, 29);
             this.btnUpdateRole.TabIndex = 4;
@@ -130,16 +131,17 @@
             // 
             // btnDeleteRole
             // 
-            this.btnDeleteRole.Location = new System.Drawing.Point(513, 341);
+            this.btnDeleteRole.Location = new System.Drawing.Point(594, 159);
             this.btnDeleteRole.Name = "btnDeleteRole";
             this.btnDeleteRole.Size = new System.Drawing.Size(94, 29);
             this.btnDeleteRole.TabIndex = 3;
             this.btnDeleteRole.Text = "Delete";
             this.btnDeleteRole.UseVisualStyleBackColor = true;
+            this.btnDeleteRole.Click += new System.EventHandler(this.btnDeleteRole_Click);
             // 
             // btnAddRole
             // 
-            this.btnAddRole.Location = new System.Drawing.Point(386, 341);
+            this.btnAddRole.Location = new System.Drawing.Point(467, 159);
             this.btnAddRole.Name = "btnAddRole";
             this.btnAddRole.Size = new System.Drawing.Size(94, 29);
             this.btnAddRole.TabIndex = 2;
