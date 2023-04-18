@@ -15,6 +15,7 @@ namespace ItemsApp
         public frmDashboard()
         {
             InitializeComponent();
+            int loginId = frmLogin.loginId;
         }
 
         private void btnManufacturer_Click(object sender, EventArgs e)
@@ -33,6 +34,19 @@ namespace ItemsApp
         {
             frmItem item = new frmItem();
             item.ShowDialog();
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            frmLogin login = new frmLogin();
+            login.Show();
+            this.Close();
+        }
+
+        private void btnUserManagement_Click(object sender, EventArgs e)
+        {
+            frmUserAdmin admin = new frmUserAdmin();
+            admin.ShowDialog();
         }
     }
 }

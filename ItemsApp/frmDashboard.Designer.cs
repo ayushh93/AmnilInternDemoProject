@@ -28,47 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnItem = new System.Windows.Forms.Button();
+            this.btnUserManagement = new System.Windows.Forms.Button();
             this.btnSupplier = new System.Windows.Forms.Button();
             this.btnManufacturer = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnLogout = new System.Windows.Forms.Button();
-            this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.button1 = new System.Windows.Forms.Button();
+            this.lblHeading = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tableLayoutPanel1
+            // btnUserManagement
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel1.Controls.Add(this.btnItem, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnSupplier, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnManufacturer, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 164);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(794, 104);
-            this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // btnItem
-            // 
-            this.btnItem.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.btnUserManagement.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnItem.BackColor = System.Drawing.Color.DimGray;
-            this.btnItem.ForeColor = System.Drawing.Color.Transparent;
-            this.btnItem.Location = new System.Drawing.Point(531, 3);
-            this.btnItem.Name = "btnItem";
-            this.btnItem.Size = new System.Drawing.Size(260, 98);
-            this.btnItem.TabIndex = 2;
-            this.btnItem.Text = "Item";
-            this.btnItem.UseVisualStyleBackColor = false;
-            this.btnItem.Click += new System.EventHandler(this.btnItem_Click);
+            this.btnUserManagement.BackColor = System.Drawing.Color.DimGray;
+            this.btnUserManagement.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnUserManagement.ForeColor = System.Drawing.Color.Transparent;
+            this.btnUserManagement.Location = new System.Drawing.Point(161, 49);
+            this.btnUserManagement.Name = "btnUserManagement";
+            this.btnUserManagement.Size = new System.Drawing.Size(470, 40);
+            this.btnUserManagement.TabIndex = 2;
+            this.btnUserManagement.Text = "User Management";
+            this.btnUserManagement.UseVisualStyleBackColor = false;
+            this.btnUserManagement.Click += new System.EventHandler(this.btnUserManagement_Click);
             // 
             // btnSupplier
             // 
@@ -76,10 +62,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSupplier.BackColor = System.Drawing.Color.DimGray;
+            this.btnSupplier.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSupplier.ForeColor = System.Drawing.Color.Transparent;
-            this.btnSupplier.Location = new System.Drawing.Point(267, 3);
+            this.btnSupplier.Location = new System.Drawing.Point(161, 141);
             this.btnSupplier.Name = "btnSupplier";
-            this.btnSupplier.Size = new System.Drawing.Size(258, 98);
+            this.btnSupplier.Size = new System.Drawing.Size(470, 40);
             this.btnSupplier.TabIndex = 1;
             this.btnSupplier.Text = "Supplier";
             this.btnSupplier.UseVisualStyleBackColor = false;
@@ -91,10 +78,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnManufacturer.BackColor = System.Drawing.Color.DimGray;
+            this.btnManufacturer.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnManufacturer.ForeColor = System.Drawing.Color.Transparent;
-            this.btnManufacturer.Location = new System.Drawing.Point(3, 3);
+            this.btnManufacturer.Location = new System.Drawing.Point(161, 95);
             this.btnManufacturer.Name = "btnManufacturer";
-            this.btnManufacturer.Size = new System.Drawing.Size(258, 98);
+            this.btnManufacturer.Size = new System.Drawing.Size(470, 40);
             this.btnManufacturer.TabIndex = 0;
             this.btnManufacturer.Text = "Manufacturer";
             this.btnManufacturer.UseVisualStyleBackColor = false;
@@ -115,13 +103,70 @@
             // 
             this.btnLogout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogout.BackColor = System.Drawing.Color.Gray;
+            this.btnLogout.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnLogout.ForeColor = System.Drawing.Color.White;
-            this.btnLogout.Location = new System.Drawing.Point(722, 416);
+            this.btnLogout.Location = new System.Drawing.Point(702, 406);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(75, 31);
+            this.btnLogout.Size = new System.Drawing.Size(86, 32);
             this.btnLogout.TabIndex = 1;
             this.btnLogout.Text = "Logout";
             this.btnLogout.UseVisualStyleBackColor = false;
+            this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.Controls.Add(this.button1, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.btnSupplier, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.btnManufacturer, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.btnUserManagement, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.lblHeading, 1, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 67);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(794, 230);
+            this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.BackColor = System.Drawing.Color.DimGray;
+            this.button1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button1.ForeColor = System.Drawing.Color.Transparent;
+            this.button1.Location = new System.Drawing.Point(161, 187);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(470, 40);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "Item";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.btnItem_Click);
+            // 
+            // lblHeading
+            // 
+            this.lblHeading.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblHeading.AutoSize = true;
+            this.lblHeading.Font = new System.Drawing.Font("Showcard Gothic", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblHeading.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
+            this.lblHeading.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lblHeading.Location = new System.Drawing.Point(161, 0);
+            this.lblHeading.Name = "lblHeading";
+            this.lblHeading.Size = new System.Drawing.Size(470, 30);
+            this.lblHeading.TabIndex = 4;
+            this.lblHeading.Text = "Modules";
+            this.lblHeading.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // frmDashboard
             // 
@@ -131,19 +176,22 @@
             this.Controls.Add(this.panel1);
             this.Name = "frmDashboard";
             this.Text = "frmDashboard";
-            this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private TableLayoutPanel tableLayoutPanel1;
         private Button btnSupplier;
         private Button btnManufacturer;
-        private Button btnItem;
+        private Button btnUserManagement;
         private Panel panel1;
         private Button btnLogout;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Button button1;
+        private Label lblHeading;
     }
 }
