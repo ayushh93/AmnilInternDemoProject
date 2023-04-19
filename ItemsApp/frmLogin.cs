@@ -61,7 +61,6 @@ namespace ItemsApp
                                 frmDashboard dashboard = new frmDashboard();
                                 dashboard.Show();
                                 this.Hide();
-                                MessageBox.Show($"Welcome {dt.Rows[0]["username"].ToString()} ", "Login Sucessful!", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
@@ -81,9 +80,8 @@ namespace ItemsApp
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit();
         }
-
         private void frmLogin_Load(object sender, EventArgs e)
         {
 

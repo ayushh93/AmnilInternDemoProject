@@ -15,7 +15,13 @@ namespace ItemsApp
         {
             InitializeComponent();
         }
-
+        private void frmUser_Load(object sender, EventArgs e)
+        {
+            showData();
+            BindRolesToComboBox();
+            BindDepartmentsToComboBox();
+            BindDesignationToComboBox();
+        }
         public bool validation()
         {
             Regex regex = new Regex(@"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$");
@@ -100,7 +106,52 @@ namespace ItemsApp
 
             return true;
         }
-
+        public void showData()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "Exec spGetUserDetails";
+                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet, "pl_users");
+                    ugUserList.DataSource = dataSet.Tables["pl_users"];
+                    ugUserList.Columns[0].Visible = false;
+                }
+            }
+        }
+        //Populate data in combo box from database tables
+        public void BindRolesToComboBox()
+        {
+            DataTable rolesTable = new DataTable();
+            SqlDataAdapter adapter = new SqlDataAdapter("SELECT role_id, name FROM pl_roles", connectionString);
+            adapter.Fill(rolesTable);
+            cmbRole.DataSource = rolesTable;
+            cmbRole.DisplayMember = "name";
+            cmbRole.ValueMember = "role_id";
+            cmbRole.SelectedIndex = -1;
+        }
+        public void BindDepartmentsToComboBox()
+        {
+            DataTable departmentsTable = new DataTable();
+            SqlDataAdapter adapter = new SqlDataAdapter("Select dept_id, dept_name from pl_departments", connectionString);
+            adapter.Fill(departmentsTable);
+            cmbDepartment.DataSource = departmentsTable;
+            cmbDepartment.DisplayMember = "dept_name";
+            cmbDepartment.ValueMember = "dept_id";
+            cmbDepartment.SelectedIndex = -1;
+        }
+        public void BindDesignationToComboBox()
+        {
+            DataTable designationTable = new DataTable();
+            SqlDataAdapter adapter = new SqlDataAdapter("Select desig_id, desig_name from pl_designations", connectionString);
+            adapter.Fill(designationTable);
+            cmbDesignation.DataSource = designationTable;
+            cmbDesignation.DisplayMember = "desig_name";
+            cmbDesignation.ValueMember = "desig_id";
+            cmbDesignation.SelectedIndex = -1;
+        }
         private void btnSubmit_Click(object sender, EventArgs e)
         {
             if (validation() == true)
@@ -166,90 +217,39 @@ namespace ItemsApp
             }
 
         }
-        public void showData()
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "Exec spGetUserDetails";
-                    SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                    DataSet dataSet = new DataSet();
-                    adapter.Fill(dataSet, "pl_users");
-                    ugUserList.DataSource = dataSet.Tables["pl_users"];
-                    ugUserList.Columns[0].Visible = false;
-                }
-            }
-        }
-
-        //Populate data in combo box from database tables
-        public void BindRolesToComboBox()
-        {
-            DataTable rolesTable = new DataTable();
-            SqlDataAdapter adapter = new SqlDataAdapter("SELECT role_id, name FROM pl_roles", connectionString);
-            adapter.Fill(rolesTable);
-            cmbRole.DataSource = rolesTable;
-            cmbRole.DisplayMember = "name";
-            cmbRole.ValueMember = "role_id";
-            cmbRole.SelectedIndex = -1;
-        }
-        public void BindDepartmentsToComboBox()
-        {
-            DataTable departmentsTable = new DataTable();
-            SqlDataAdapter adapter = new SqlDataAdapter("Select dept_id, dept_name from pl_departments", connectionString);
-            adapter.Fill(departmentsTable);
-            cmbDepartment.DataSource = departmentsTable;
-            cmbDepartment.DisplayMember = "dept_name";
-            cmbDepartment.ValueMember = "dept_id";
-            cmbDepartment.SelectedIndex = -1;
-        }
-        public void BindDesignationToComboBox()
-        {
-            DataTable designationTable = new DataTable();
-            SqlDataAdapter adapter = new SqlDataAdapter("Select desig_id, desig_name from pl_designations", connectionString);
-            adapter.Fill(designationTable);
-            cmbDesignation.DataSource = designationTable;
-            cmbDesignation.DisplayMember = "desig_name";
-            cmbDesignation.ValueMember = "desig_id";
-            cmbDesignation.SelectedIndex = -1;
-        }
-        public void clearUpdateControls(Control c)
-        {
-            if (c is TextBox tb)
-            {
-                if (tb.Name != "txtUserName" && tb.Name != "txtPassword")
-                {
-                    tb.Clear();
-                }
-            }
-            else if (c is ComboBox cb)
-            {
-                cb.SelectedIndex = -1;
-            }
-            else if (c is RadioButton rb)
-            {
-                rb.Checked = false;
-            }
-            else if (c is DateTimePicker dateTimePicker)
-            {
-                dateTimePicker.Value = DateTime.Now;
-            }
-        }
         private void btnClear_Click(object sender, EventArgs e)
         {
             foreach (Control c in Controls)
             {
-                clearUpdateControls(c);
+                if (c is TextBox tb)
+                {
+                    tb.Clear();
+                }
+                else if (c is ComboBox cb)
+                {
+                    cb.SelectedIndex = -1;
+                }
+                else if (c is RadioButton rb)
+                {
+                    rb.Checked = false;
+                }
+                else if (c is DateTimePicker dateTimePicker)
+                {
+                    dateTimePicker.Value = DateTime.Now;
+                }
             }
         }
-        private void frmUser_Load(object sender, EventArgs e)
+        private void btnCancel_Click(object sender, EventArgs e)
         {
-            showData();
-            BindRolesToComboBox();
-            BindDepartmentsToComboBox();
-            BindDesignationToComboBox();
+            btnClear.PerformClick();
+            txtUserName.Enabled= true;
+            txtPassword.Enabled= true;
+            txtConfirmPassword.Enabled= true;
+            btnSubmit.Enabled= true;
+            btnUpdate.Enabled= false;
+            btnCancel.Enabled= false;
+            btnDelete.Enabled= false;
         }
-
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             if (validation() == true)
@@ -286,21 +286,20 @@ namespace ItemsApp
                         conn.Open();
                         cmd.ExecuteNonQuery();
                         conn.Close();
-                        frmAddMore add = new frmAddMore();
-                        add.clearControls(this);
-                        showData();
+                        btnCancel.PerformClick();
                         MessageBox.Show($"User {name} updated!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
         }
-
         private void ugUserList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             btnUpdate.Enabled = true;
             btnDelete.Enabled = true;
             btnSubmit.Enabled = false;
+            btnCancel.Enabled = true;
 
+            txtUserName.Enabled = false;
             userId = Convert.ToInt32(ugUserList.Rows[e.RowIndex].Cells[0].Value.ToString());
             txtName.Text = ugUserList.Rows[e.RowIndex].Cells[1].Value.ToString();
             txtPhone.Text = ugUserList.Rows[e.RowIndex].Cells[2].Value.ToString();
@@ -355,8 +354,28 @@ namespace ItemsApp
 
             }
         }
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            string name = txtName.Text;
+            DialogResult result = MessageBox.Show($"Do you want to delete user {name}!", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                SqlConnection conn = new SqlConnection(connectionString);
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM pl_users where user_id = @userid";
+                    cmd.Parameters.AddWithValue("@userid", userId);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                    MessageBox.Show($"User Deleted!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    showData();
+                    btnClear.PerformClick();
+                }
+            }
+
+
+
+        }
     }
-
-
-
 }

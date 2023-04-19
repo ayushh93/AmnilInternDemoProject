@@ -127,7 +127,6 @@
             this.btnUpdateRole.TabIndex = 4;
             this.btnUpdateRole.Text = "Update";
             this.btnUpdateRole.UseVisualStyleBackColor = true;
-            this.btnUpdateRole.Click += new System.EventHandler(this.btnUpdateRole_Click);
             // 
             // btnDeleteRole
             // 
@@ -240,6 +239,7 @@
             this.btnDeleteDepart.TabIndex = 8;
             this.btnDeleteDepart.Text = "Delete";
             this.btnDeleteDepart.UseVisualStyleBackColor = true;
+            this.btnDeleteDepart.Click += new System.EventHandler(this.btnDeleteDepart_Click);
             // 
             // btnAddDepartment
             // 
@@ -343,6 +343,7 @@
             this.btnDeleteDesig.TabIndex = 17;
             this.btnDeleteDesig.Text = "Delete";
             this.btnDeleteDesig.UseVisualStyleBackColor = true;
+            this.btnDeleteDesig.Click += new System.EventHandler(this.btnDeleteDesig_Click);
             // 
             // btnAddDesignation
             // 
@@ -394,7 +395,7 @@
             this.ugPermissionList.Name = "ugPermissionList";
             this.ugPermissionList.RowHeadersWidth = 51;
             this.ugPermissionList.RowTemplate.Height = 29;
-            this.ugPermissionList.Size = new System.Drawing.Size(849, 188);
+            this.ugPermissionList.Size = new System.Drawing.Size(849, 450);
             this.ugPermissionList.TabIndex = 32;
             // 
             // panel1

@@ -9,7 +9,7 @@ namespace ItemsApp.Helpers
 {
     public static class AuthorisationHelper
     {
-        static string connectionString = "Server=AYUSH-KARMA;Initial Catalog=UserManagementDB;Integrated Security=True;Encrypt=False;";
+        static string connectionString = ConfigurationHelper.GetConnectionString("UserManagementDB");
 
         //Returns role id of the logged in user
         public static int GetUserRoleId(int loginId)
