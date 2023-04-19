@@ -1,3 +1,4 @@
+using ItemsApp.Helpers;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ namespace ItemsApp
     public partial class frmUser : Form
     {
         frmAddMore addMore;
-        static string connectionString = "Server=AYUSH-KARMA;Initial Catalog=UserManagementDB;Integrated Security=True;Encrypt=False;";
+        static string connectionString = ConfigurationHelper.GetConnectionString("UserManagementDB");
         public frmUser()
         {
             InitializeComponent();

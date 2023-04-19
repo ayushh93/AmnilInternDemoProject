@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ItemsApp.Helpers;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,7 +17,7 @@ namespace ItemsApp
 {
     public partial class frmManufacturer : Form
     {
-        static string connectionString = "Server=AYUSH-KARMA;Initial Catalog=ItemsDB;Integrated Security=True;Encrypt=False;";
+        static string connectionString = ConfigurationHelper.GetConnectionString("ItemsDB");
         int pid = 0;
         int _id = 0;
         string _name;

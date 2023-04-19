@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ItemsApp.Helpers;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,7 @@ namespace ItemsApp
 {
     public partial class frmLogin : Form
     {
-        static string connectionString = "Server=AYUSH-KARMA;Initial Catalog=UserManagementDB;Integrated Security=True;Encrypt=False;";
+        static string connectionString = ConfigurationHelper.GetConnectionString("UserManagementDB");
         public static int loginId = 0;
 
         public frmLogin()
@@ -44,26 +45,23 @@ namespace ItemsApp
                         if (dt.Rows.Count > 0)
                         {
                             loginId = Convert.ToInt32(dt.Rows[0]["user_id"]);
-                            if (dt.Rows[0]["fk_role_id"].ToString() == "9")
+                           /* if (dt.Rows[0]["fk_role_id"].ToString() == "9")
                             {
-                                /*frmUserAdmin admin = new frmUserAdmin();
+                                *//*frmUserAdmin admin = new frmUserAdmin();
                                 admin.Show();
-                                this.Hide();*/
+                                this.Hide();*//*
                                 frmDashboard dashboard = new frmDashboard();
                                 dashboard.Show();
                                 this.Hide();
                                 MessageBox.Show($"Welcome {dt.Rows[0]["username"].ToString()} ", "Login Sucessful!", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
 
-                            }
-                            else
-                            {
+                            }*/
+                            
                                 frmDashboard dashboard = new frmDashboard();
                                 dashboard.Show();
                                 this.Hide();
                                 MessageBox.Show($"Welcome {dt.Rows[0]["username"].ToString()} ", "Login Sucessful!", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                            }
                         }
                         else
                         {

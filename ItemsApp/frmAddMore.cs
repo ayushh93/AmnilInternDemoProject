@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ItemsApp.Helpers;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ItemsApp
@@ -9,7 +10,7 @@ namespace ItemsApp
         private Dictionary<int, bool> permissions = new Dictionary<int, bool>();
 
         frmUserAdmin addRoles = new frmUserAdmin();
-        static string connectionString = "Server=AYUSH-KARMA;Initial Catalog=UserManagementDB;Integrated Security=True;Encrypt=False;";
+        static string connectionString = ConfigurationHelper.GetConnectionString("UserManagementDB");
 
         public frmAddMore()
         {
@@ -174,8 +175,6 @@ namespace ItemsApp
             showAllDepartments();
             showAllDesignations();
         }
-
-
 
         private void btnAddPermission_Click(object sender, EventArgs e)
         {
