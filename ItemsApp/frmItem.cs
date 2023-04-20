@@ -40,11 +40,7 @@ namespace ItemsApp
             {
                 dateTimePicker.Value = DateTime.Now;
             }
-            _id = 0;
-            btnUpdate.Enabled = false;
-            btnUpdate.Visible = false;
-            btnSubmit.Enabled = true;
-            btnSubmit.Visible = true;
+            
         }
 
         private void LoadData()
@@ -94,6 +90,30 @@ namespace ItemsApp
 
         }
 
+        public void showSupplier()
+        {
+            DataTable supplierDatatable = new DataTable();
+            SqlDataAdapter adapter = new SqlDataAdapter("SELECT id, name AS Supplier,cast(0 as bit) as checkSupplier FROM pl_object WHERE object_name = 'Supplier' ", connectionString);
+            adapter.Fill(supplierDatatable);
+            ugSupplier.DataSource = supplierDatatable;
+
+            ugSupplier.Columns[0].Visible = false;
+
+            //DataGridViewCheckBoxColumn chkColumn = new DataGridViewCheckBoxColumn();
+            //chkColumn.HeaderText = "Check";
+            //chkColumn.Name = "checkSupplier";
+            //ugSupplier.Columns.Add(chkColumn);
+            //ugSupplier.Columns["Supplier"].ReadOnly = true;
+            //// Customize the DataGridView appearance
+            //ugSupplier.DefaultCellStyle.Font = new Font("Tahoma", 10);
+            //ugSupplier.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            //ugSupplier.AlternatingRowsDefaultCellStyle.BackColor = Color.LightGray;
+            //ugSupplier.ColumnHeadersDefaultCellStyle.Font = new Font("Tahoma", 10, FontStyle.Bold);
+            //ugSupplier.ColumnHeadersDefaultCellStyle.BackColor = Color.DarkGray;
+            //ugSupplier.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            //ugSupplier.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        }
+
         #endregion
 
         private void lblHeading_Click(object sender, EventArgs e)
@@ -107,18 +127,25 @@ namespace ItemsApp
             {
                 clearControls(c);
             }
+            _id = 0;
+            btnUpdate.Enabled = false;
+            btnUpdate.Visible = false;
+            btnSubmit.Enabled = true;
+            btnSubmit.Visible = true;
+            ugSupplier.DataSource = null;
+            showSupplier();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             btnUpdate.Enabled = false;
-            btnUpdate.Visible= false;
+            btnUpdate.Visible = false;
             LoadData();
+            showSupplier();
         }
-
         private void btnSubmit_Click(object sender, EventArgs e)
         {
-
+           
             if (string.IsNullOrEmpty(txtName.Text) || cmbType.SelectedIndex == -1 || cmbCategory.SelectedIndex == -1 ||
                 cmbStandard.SelectedIndex == -1 || string.IsNullOrEmpty(txtMeasurementUnit.Text) ||
                 string.IsNullOrEmpty(txtCode.Text) || string.IsNullOrEmpty(txtMinReorderUnit.Text))
@@ -134,109 +161,109 @@ namespace ItemsApp
                 return;
             }
 
-            try
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                // Insert into pl_object table first
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                connection.Open();
+                SqlTransaction submitTransaction = connection.BeginTransaction();
+                try
                 {
-                    using (SqlCommand cmd = connection.CreateCommand())
+                    // Insert into pl_object table first
+                    //Item code unique validation starts
+                    SqlCommand query = new SqlCommand("Select value from pl_string where column_type = 'item_code' AND value = @code", connection, submitTransaction);
+                    query.Parameters.AddWithValue("@code", txtCode.Text);
+                    SqlDataAdapter codeCheck = new SqlDataAdapter(query);
+                    DataTable codeTable = new DataTable();
+                    codeCheck.Fill(codeTable);
+                    if (codeTable.Rows.Count > 0)
                     {
-                        //Item code unique validation starts
-                        SqlCommand query = new SqlCommand("Select value from pl_string where column_type = 'item_code' AND value = @code", connection);
-                        query.Parameters.AddWithValue("@code", txtCode.Text);
-                        SqlDataAdapter codeCheck = new SqlDataAdapter(query);
-                        DataTable codeTable = new DataTable();
-                        codeCheck.Fill(codeTable);
-                        if (codeTable.Rows.Count > 0)
+                        MessageBox.Show("Item Code already exists! Please select another code!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    //Item code unique validation ends
+
+                    SqlCommand insertobject = new SqlCommand("INSERT INTO pl_object(object_name, name) VALUES(@objectName,@name)", connection, submitTransaction);
+                    insertobject.Parameters.AddWithValue("@objectName", "Item");
+                    insertobject.Parameters.AddWithValue("@name", txtName.Text);
+                    insertobject.ExecuteNonQuery();
+
+
+                    //retrieve id of object for assigning foreign key in child tables
+                    SqlCommand retrieve = new SqlCommand("SELECT MAX(id) FROM pl_object ", connection, submitTransaction);
+                    pid = (int)retrieve.ExecuteScalar();
+
+                    //Insert into child tables of pl_object
+
+                    SqlCommand insertdata = new SqlCommand("INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType1, @value1)" + "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType2, @value2)" +
+                        "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType3, @value3)" +
+                        "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType4, @value4)" +
+                        "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType5, @value5)" +
+                        "INSERT INTO pl_int(pid,column_type, value) VALUES(@pid, @columnType6, @value6)", connection,submitTransaction);
+
+                    insertdata.Parameters.AddWithValue("@pid", pid);
+
+                    //* STRING data parameters starts*//*
+                    //Type
+                    insertdata.Parameters.AddWithValue("@columnType1", "item_type");
+                    insertdata.Parameters.AddWithValue("@value1", cmbType.SelectedItem);
+                    //Category
+                    insertdata.Parameters.AddWithValue("@columnType2", "item_category");
+                    insertdata.Parameters.AddWithValue("@value2", cmbCategory.SelectedItem);
+                    //Standard
+                    insertdata.Parameters.AddWithValue("@columnType3", "item_standard");
+                    insertdata.Parameters.AddWithValue("@value3", cmbStandard.SelectedItem);
+                    //Measurement Unit
+                    insertdata.Parameters.AddWithValue("@columnType4", "item_measurement_unit");
+                    insertdata.Parameters.AddWithValue("@value4", txtMeasurementUnit.Text);
+                    //Code
+                    insertdata.Parameters.AddWithValue("@columnType5", "item_code");
+                    insertdata.Parameters.AddWithValue("@value5", txtCode.Text);
+                    //* STRING data parameters ends*/
+
+                    /* INT data parameters starts*/
+                    //MinReorderUnit
+                    insertdata.Parameters.AddWithValue("@columnType6", "item_MinReorderUnit");
+                    insertdata.Parameters.AddWithValue("@value6", minReorderUnit);
+                    //* INT data parameters ends*/
+
+                    insertdata.ExecuteNonQuery();
+
+                    //INSERT INTO SUPPLIER_ITEM PIVOT TABLE
+                    foreach (DataGridViewRow row in ugSupplier.Rows)
+                    {
+                        bool assigned = Convert.ToBoolean(row.Cells["checkSupplier"].Value);
+                        int supplierId = Convert.ToInt32(row.Cells["id"].Value);
+                        if (assigned)
                         {
-                            MessageBox.Show("Item Code already exists! Please select another code!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
+                            SqlCommand relationQuery = new SqlCommand("INSERT into supplier_item (supplier_id, item_id) values(@supplier_id, @item_id)",connection,submitTransaction);
+                            relationQuery.Parameters.AddWithValue("@supplier_id", supplierId);
+                            relationQuery.Parameters.AddWithValue("@item_id", pid);
+                            relationQuery.ExecuteNonQuery();
                         }
-                        //Item code unique validation ends
-
-                        cmd.CommandText = "INSERT INTO pl_object(object_name, name) VALUES(@objectName, @name)";
-                        cmd.Parameters.AddWithValue("@objectName", "Item");
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
                     }
+                    submitTransaction.Commit();
+                    MessageBox.Show("Data inserted succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                //retrieve id of object for assigning foreign key in child tables
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                catch (Exception ex)
                 {
-                    using (SqlCommand cmd = connection.CreateCommand())
+                    submitTransaction.Rollback();
+                    MessageBox.Show($"Data could not be inserted! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    connection.Close();
+                    //refresh data in datagridview
+                    LoadData();
+                    //redirect to tabPage2
+                    tabControl1.SelectedTab = tabPage2;
+                    //clearcontrols
+                    foreach (Control c in tabPage1.Controls)
                     {
-                        cmd.CommandText = "SELECT MAX(id) FROM pl_object ";
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        pid = (int)cmd.ExecuteScalar();
-                        connection.Close();
+                        clearControls(c);
                     }
                 }
-                //Insert into child tables of pl_object
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
-
-                        cmd.CommandText = "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType1, @value1)" +                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType2, @value2)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType3, @value3)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType4, @value4)" +
-                            "INSERT INTO pl_string(pid,column_type, value) VALUES(@pid, @columnType5, @value5)" +
-                            "INSERT INTO pl_int(pid,column_type, value) VALUES(@pid, @columnType6, @value6)";
-
-                        cmd.Parameters.AddWithValue("@pid", pid);
-
-                        //* STRING data parameters starts*//*
-                        //Type
-                        cmd.Parameters.AddWithValue("@columnType1", "item_type");
-                        cmd.Parameters.AddWithValue("@value1", cmbType.SelectedItem);
-                        //Category
-                        cmd.Parameters.AddWithValue("@columnType2", "item_category");
-                        cmd.Parameters.AddWithValue("@value2", cmbCategory.SelectedItem);
-                        //Standard
-                        cmd.Parameters.AddWithValue("@columnType3", "item_standard");
-                        cmd.Parameters.AddWithValue("@value3", cmbStandard.SelectedItem);
-                        //Measurement Unit
-                        cmd.Parameters.AddWithValue("@columnType4", "item_measurement_unit");
-                        cmd.Parameters.AddWithValue("@value4", txtMeasurementUnit.Text);
-                        //Code
-                        cmd.Parameters.AddWithValue("@columnType5", "item_code");
-                        cmd.Parameters.AddWithValue("@value5", txtCode.Text);
-                        //* STRING data parameters ends*/
-
-                        /* INT data parameters starts*/
-                        //MinReorderUnit
-                        cmd.Parameters.AddWithValue("@columnType6", "item_MinReorderUnit");
-                        cmd.Parameters.AddWithValue("@value6", minReorderUnit);
-                        //* INT data parameters ends*/
-
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
-                    }
-                }
-                MessageBox.Show("Data inserted succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Data could not be inserted! - {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                //refresh data in datagridview
-                LoadData();
-                //redirect to tabPage2
-                tabControl1.SelectedTab = tabPage2;
-                //clearcontrols
-                foreach (Control c in tabPage1.Controls)
-                {
-                    clearControls(c);
-                }
-            }
-         
+           
+
         }
 
         private void dgvItem_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -251,8 +278,20 @@ namespace ItemsApp
                 cmbType.Text = row.Cells["Type"].Value.ToString();
                 cmbCategory.Text = row.Cells["Category"].Value.ToString();
                 cmbStandard.Text = row.Cells["Standard"].Value.ToString();
-                txtMeasurementUnit.Text= row.Cells["Measurement Unit"].Value.ToString();
-                txtMinReorderUnit.Text= row.Cells["Min Reorder Unit"].Value.ToString();
+                txtMeasurementUnit.Text = row.Cells["Measurement Unit"].Value.ToString();
+                txtMinReorderUnit.Text = row.Cells["Min Reorder Unit"].Value.ToString();
+
+                string sql = "SELECT s.id, s.name as Suppliers, case when si.item_id is null\r\nthen cast(0 as bit) else cast(1 as bit) end as 'checkSupplier'\r\nFROM (SELECT id, name from pl_object where object_name = 'Supplier') s\r\nLEFT JOIN supplier_item si ON s.id = si.supplier_id AND si.item_id = @itemId";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    cmd.Parameters.AddWithValue("@itemId", _id);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    ugSupplier.DataSource = dt;
+                    ugSupplier.Columns[0].Visible = false;
+                }
 
                 // Switch to tabPage1 to show the selected row in the form
                 tabControl1.SelectedTab = tabPage1;
@@ -290,74 +329,87 @@ namespace ItemsApp
                 return;
             try
             {
-                // Update pl_object table first
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
-                        //Item code unique validation starts
-                        SqlCommand query = new SqlCommand("Select value from pl_string where column_type = 'item_code' and value = @code and pid != @id", connection);
-                        query.Parameters.AddWithValue("@code", txtCode.Text);
-                        query.Parameters.AddWithValue("@id",_id);
-                        SqlDataAdapter codeCheck = new SqlDataAdapter(query);
-                        DataTable codeTable = new DataTable();
-                        codeCheck.Fill(codeTable);
-                        if (codeTable.Rows.Count > 0)
-                        {
-                            MessageBox.Show("Item Code already exists! Please select another code!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-                        //Item code unique validation ends
-                        cmd.CommandText = "UPDATE pl_object SET  name=@name WHERE id=@id";
-                        cmd.Parameters.AddWithValue("@id", _id);
-                        cmd.Parameters.AddWithValue("@name", txtName.Text);
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
-                    }
-                }
-                //Insert into child tables of pl_object
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = connection.CreateCommand())
-                    {
+                    connection.Open();
 
-                        cmd.CommandText = "UPDATE pl_string SET  value=@value1  WHERE pid=@pid AND column_type=@columnType1" +
+                    //Item code unique validation starts
+                    SqlCommand query = new SqlCommand("Select value from pl_string where column_type = 'item_code' and value = @code and pid != @id", connection);
+                    query.Parameters.AddWithValue("@code", txtCode.Text);
+                    query.Parameters.AddWithValue("@id", _id);
+                    SqlDataAdapter codeCheck = new SqlDataAdapter(query);
+                    DataTable codeTable = new DataTable();
+                    codeCheck.Fill(codeTable);
+                    if (codeTable.Rows.Count > 0)
+                    {
+                        MessageBox.Show("Item Code already exists! Please select another code!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    //Item code unique validation ends
+
+                    //UPDATE OBJECT TABLE FIRST
+                    SqlCommand insertobject = new SqlCommand("UPDATE pl_object SET  name=@name WHERE id=@id", connection);
+                    insertobject.Parameters.AddWithValue("@id", _id);
+                    insertobject.Parameters.AddWithValue("@name", txtName.Text);
+                    insertobject.ExecuteNonQuery();
+
+
+                    //Insert into child tables of pl_object
+                    SqlCommand insertdata = new SqlCommand("UPDATE pl_string SET  value=@value1  WHERE pid=@pid AND column_type=@columnType1" +
                             " UPDATE pl_string SET value=@value2  WHERE pid=@pid AND column_type=@columnType2" +
                             " UPDATE pl_string SET value=@value3  WHERE pid=@pid AND column_type=@columnType3" +
                             " UPDATE pl_string SET value=@value4  WHERE pid=@pid AND column_type=@columnType4" +
                             " UPDATE pl_string SET value=@value5  WHERE pid=@pid AND column_type=@columnType5" +
-                            " UPDATE pl_int SET value=@value6 WHERE pid=@pid AND column_type=@columnType6";
+                            " UPDATE pl_int SET value=@value6 WHERE pid=@pid AND column_type=@columnType6", connection);
 
-                        cmd.Parameters.AddWithValue("@pid", _id);
-                        //* STRING data parameters starts*//*
-                        //Type
-                        cmd.Parameters.AddWithValue("@columnType1", "item_type");
-                        cmd.Parameters.AddWithValue("@value1", cmbType.SelectedItem);
-                        //Category
-                        cmd.Parameters.AddWithValue("@columnType2", "item_category");
-                        cmd.Parameters.AddWithValue("@value2", cmbCategory.SelectedItem);
-                        //Standard
-                        cmd.Parameters.AddWithValue("@columnType3", "item_standard");
-                        cmd.Parameters.AddWithValue("@value3", cmbStandard.SelectedItem);
-                        //Measurement Unit
-                        cmd.Parameters.AddWithValue("@columnType4", "item_measurement_unit");
-                        cmd.Parameters.AddWithValue("@value4", txtMeasurementUnit.Text);
-                        //Code
-                        cmd.Parameters.AddWithValue("@columnType5", "item_code");
-                        cmd.Parameters.AddWithValue("@value5", txtCode.Text);
-                        //* STRING data parameters ends*/
+                    insertdata.Parameters.AddWithValue("@pid", _id);
+                    //* STRING data parameters starts*//*
+                    //Type
+                    insertdata.Parameters.AddWithValue("@columnType1", "item_type");
+                    insertdata.Parameters.AddWithValue("@value1", cmbType.SelectedItem);
+                    //Category
+                    insertdata.Parameters.AddWithValue("@columnType2", "item_category");
+                    insertdata.Parameters.AddWithValue("@value2", cmbCategory.SelectedItem);
+                    //Standard
+                    insertdata.Parameters.AddWithValue("@columnType3", "item_standard");
+                    insertdata.Parameters.AddWithValue("@value3", cmbStandard.SelectedItem);
+                    //Measurement Unit
+                    insertdata.Parameters.AddWithValue("@columnType4", "item_measurement_unit");
+                    insertdata.Parameters.AddWithValue("@value4", txtMeasurementUnit.Text);
+                    //Code
+                    insertdata.Parameters.AddWithValue("@columnType5", "item_code");
+                    insertdata.Parameters.AddWithValue("@value5", txtCode.Text);
+                    //* STRING data parameters ends*/
 
-                        /* INT data parameters starts*/
-                        //MinReorderUnit
-                        cmd.Parameters.AddWithValue("@columnType6", "item_MinReorderUnit");
-                        cmd.Parameters.AddWithValue("@value6", minReorderUnit);
-                        //* INT data parameters ends*/
+                    /* INT data parameters starts*/
+                    //MinReorderUnit
+                    insertdata.Parameters.AddWithValue("@columnType6", "item_MinReorderUnit");
+                    insertdata.Parameters.AddWithValue("@value6", minReorderUnit);
+                    //* INT data parameters ends*/
 
-                        connection.Open();
-                        cmd.ExecuteNonQuery();
-                        connection.Close();
+                    insertdata.ExecuteNonQuery();
+
+                    // FIRST, DELETE ALL EXISTING RECORDS FOR THE ITEM IN THE PIVOT TABLE
+                    SqlCommand deleteCommand = new SqlCommand("DELETE FROM supplier_item WHERE item_id = @itemId", connection);
+                    deleteCommand.Parameters.AddWithValue("@itemId", _id);
+                    deleteCommand.ExecuteNonQuery();
+
+                    ((DataTable)ugSupplier.DataSource).AcceptChanges();
+                    DataTable dt = (DataTable)ugSupplier.DataSource;
+                    //INSERT INTO SUPPLIER_ITEM PIVOT TABLE
+                    foreach (DataGridViewRow row in ugSupplier.Rows)
+                    {
+                        bool assigned = Convert.ToBoolean(row.Cells[3].Value);
+                        int supplierId = Convert.ToInt32(row.Cells["id"].Value);
+                        if (assigned)
+                        {
+                            SqlCommand relationQuery = new SqlCommand("INSERT into supplier_item (supplier_id, item_id) values(@supplier_id, @item_id)", connection);
+                            relationQuery.Parameters.AddWithValue("@supplier_id", supplierId);
+                            relationQuery.Parameters.AddWithValue("@item_id", _id);
+                            relationQuery.ExecuteNonQuery();
+                        }
                     }
+
                 }
                 MessageBox.Show("Item updated succesfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -369,7 +421,7 @@ namespace ItemsApp
             finally
             {
                 //clear controls
-                foreach(Control c in tabPage1.Controls)
+                foreach (Control c in tabPage1.Controls)
                 {
                     clearControls(c);
                 }
@@ -394,7 +446,7 @@ namespace ItemsApp
                 _id = Convert.ToInt32(currentRow.Cells["Id"].Value.ToString());
                 _name = currentRow.Cells["Name"].Value.ToString();
                 if (MessageBox.Show($"Are you sure you want to delete this item {_name}?", "ItemsApp", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
-                return;
+                    return;
                 try
                 {
                     using (SqlConnection connection = new SqlConnection(connectionString))
