@@ -309,7 +309,6 @@ namespace ItemsApp
 
                     /*RETRIEVE ID OF OBJECT FOR ASSIGNING FOREIGN KEY IN CHILD TABLES*/
                     SqlCommand objectIdQuery = new SqlCommand("SELECT MAX(id) FROM pl_object", connection, submitTransaction);
-                    objectIdQuery.Parameters.AddWithValue("@name", txtName.Text);
                     _id = (int)objectIdQuery.ExecuteScalar();
                     /*RETRIEVE ID OF OBJECT FOR ASSIGNING FOREIGN KEY IN CHILD TABLES*/
 
