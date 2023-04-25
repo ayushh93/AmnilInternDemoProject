@@ -1,17 +1,14 @@
 ﻿using ItemsApp.Helpers;
 using Microsoft.Data.SqlClient;
 using System.Data;
-
 namespace ItemsApp
 {
     public partial class frmAddMore : Form
     {
         int roleId = 0;
-        private Dictionary<int, bool> permissions = new Dictionary<int, bool>();
-
+        int departmentId = 0;
         frmUserAdmin addRoles = new frmUserAdmin();
         static string connectionString = ConfigurationHelper.GetConnectionString("UserManagementDB");
-
         public frmAddMore()
         {
             InitializeComponent();
@@ -37,10 +34,15 @@ namespace ItemsApp
                     dateTimePicker.Value = DateTime.Now;
                 }
             }
-            
         }
         private void btnAddRole_Click(object sender, EventArgs e)
         {
+            if (txtRoleName.Text == string.Empty)
+            {
+                MessageBox.Show("Empty field!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtRoleName.Focus();
+                return;
+            }
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = conn.CreateCommand())
@@ -50,8 +52,10 @@ namespace ItemsApp
                     conn.Open();
                     cmd.ExecuteNonQuery();
                     conn.Close();
-                    clearControls(this);
+                    clearControls(tabRole);
                     MessageBox.Show("Roles Added!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    showAllRoles();
+
 
                     //update combobox instantly after inserting data in database tables 
                     if (addRoles != null)
@@ -59,11 +63,16 @@ namespace ItemsApp
                         addRoles.BindRolesToComboBox();
                     }
                 }
-
             }
         }
         private void btnAddDepartment_Click(object sender, EventArgs e)
         {
+            if (txtDepartmentName.Text == string.Empty)
+            {
+                MessageBox.Show("Empty field!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDepartmentName.Focus();
+                return;
+            }
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = conn.CreateCommand())
@@ -74,7 +83,8 @@ namespace ItemsApp
                     conn.Open();
                     cmd.ExecuteNonQuery();
                     conn.Close();
-                    clearControls(this);
+                    clearControls(tabDept);
+                    showAllDepartments();
                     MessageBox.Show("Departments Added!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     if (addRoles != null)
                     {
@@ -102,7 +112,6 @@ namespace ItemsApp
                     {
                         addRoles.BindDesignationToComboBox();
                     }
-
                 }
             }
         }
@@ -123,7 +132,6 @@ namespace ItemsApp
                     {
                         MessageBox.Show("Select role to update!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
-
                     }
                     else
                     {
@@ -152,13 +160,16 @@ namespace ItemsApp
                         ShowSelectedPermission();
                         MessageBox.Show("Updated permission!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-
-
                 }
             }
         }
         private void btnDeleteRole_Click(object sender, EventArgs e)
         {
+            if (roleId == 0)
+            {
+                MessageBox.Show("No role selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -186,13 +197,110 @@ namespace ItemsApp
                     }
                     finally
                     {
+                        btnDeleteRole.Enabled = false;
+                        btnAddRole.Enabled = true;
+                        btnUpdateRole.Enabled = false;
+                        clearControls(tabRole);
                         showAllRoles();
-
                         conn.Close();
                     }
                 }
-
             }
+        }
+        private void btnDeleteDesig_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void btnDeleteDepart_Click(object sender, EventArgs e)
+        {
+            if (departmentId == 0)
+            {
+                MessageBox.Show("No department selected!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        DialogResult result = MessageBox.Show($"Do you want to delete department!", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        if (result == DialogResult.Yes)
+                        {
+                            SqlCommand updateUserTable = new SqlCommand("Update pl_users set fk_dept_id = null where fk_dept_id = @deptid", conn, trans);
+                            updateUserTable.Parameters.AddWithValue("@deptid", departmentId);
+                            SqlCommand dltdept = new SqlCommand("Delete from pl_departments where dept_id = @deptId", conn, trans);
+                            dltdept.Parameters.AddWithValue("@deptid", departmentId);
+                            updateUserTable.ExecuteNonQuery();
+                            dltdept.ExecuteNonQuery();
+                            trans.Commit();
+                            MessageBox.Show("Department Deleted!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        trans.Rollback();
+                        MessageBox.Show("An error occurred: " + ex.Message);
+                    }
+                    finally
+                    {
+                        btnClearDepart.PerformClick();
+                        showAllDepartments();
+                        btnDeleteDepart.Enabled = false;
+                        btnUpdateDepart.Enabled = false;
+                        btnAddDepartment.Enabled = true;
+                        conn.Close();
+                    }
+                }
+            }
+        }
+        private void btnUpdateRole_Click(object sender, EventArgs e)
+        {
+            if (txtRoleName.Text == string.Empty)
+            {
+                MessageBox.Show("Empty input field!", "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtRoleName.Focus();    
+                return;
+            }
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        SqlCommand updateRole = new SqlCommand("Update pl_roles set name = @name where role_id = @roleid", conn, trans);
+                        updateRole.Parameters.AddWithValue("@name", txtRoleName.Text);
+                        updateRole.Parameters.AddWithValue("@roleid", roleId);
+                        updateRole.ExecuteNonQuery();
+                        trans.Commit();
+                        MessageBox.Show("Role Updated!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        trans.Rollback();
+                        MessageBox.Show("An error occurred: " + ex.Message);
+                    }
+                    finally
+                    {
+                        btnDeleteRole.Enabled = false;
+                        btnAddRole.Enabled = true;
+                        btnUpdateRole.Enabled = false;
+                        clearControls(tabRole);
+                        showAllRoles();
+                        conn.Close();
+                    }
+                }
+            }
+        }
+        private void btnUpdateDepart_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void btnClearDepart_Click(object sender, EventArgs e)
+        {
+            clearControls(tabDept);
         }
         public void BindRolesToComboBox()
         {
@@ -210,8 +318,8 @@ namespace ItemsApp
             {
                 if (cmbRoles.SelectedItem != null)
                 {
-                    int roleId = (int)cmbRoles.SelectedValue;
-                    string sql = "sp_GetPermission @roleid";
+                    roleId = (int)cmbRoles.SelectedValue;
+                    string sql = "sp_GetRolesPermission @roleid";
                     using (SqlConnection con = new SqlConnection(connectionString))
                     {
                         SqlCommand cmd = new SqlCommand(sql, con);
@@ -221,7 +329,6 @@ namespace ItemsApp
                         da.Fill(dt);
                         ugPermissionList.DataSource = dt;
                         ugPermissionList.Columns[0].Visible = false;
-                        ugPermissionList.Columns[2].ValueType = typeof(bool);
                     }
                 }
             }
@@ -233,23 +340,17 @@ namespace ItemsApp
         public void showPermission()
         {
             DataTable permissioDatatable = new DataTable();
-            SqlDataAdapter adapter = new SqlDataAdapter("Select p_id, permission_name as Permission from pl_permission", connectionString);
+            SqlDataAdapter adapter = new SqlDataAdapter("sp_GetPermission", connectionString);
             adapter.Fill(permissioDatatable);
             ugPermissionList.DataSource = permissioDatatable;
             ugPermissionList.Columns[0].Visible = false;
-
-            DataGridViewCheckBoxColumn chkColumn = new DataGridViewCheckBoxColumn();
-            chkColumn.HeaderText = "Allow";
-            chkColumn.Name = "chkHasPermission";
-            ugPermissionList.Columns.Add(chkColumn);
-            ugPermissionList.Columns["Permission"].ReadOnly = true;
         }
         public void showAllRoles()
         {
-            SqlDataAdapter adapter= new SqlDataAdapter("Select role_id, name as Roles from pl_roles", connectionString);
-            DataTable dataTable= new DataTable();
+            SqlDataAdapter adapter = new SqlDataAdapter("Select role_id, name as Roles from pl_roles", connectionString);
+            DataTable dataTable = new DataTable();
             adapter.Fill(dataTable);
-            ugRoleList.DataSource= dataTable;
+            ugRoleList.DataSource = dataTable;
             ugRoleList.Columns[0].Visible = false;
         }
         public void showAllDepartments()
@@ -281,20 +382,21 @@ namespace ItemsApp
         }
         private void ugRoleList_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            btnDeleteRole.Enabled = true;
             btnAddRole.Enabled = false;
+            btnUpdateRole.Enabled = true;
             roleId = Convert.ToInt32(ugRoleList.Rows[e.RowIndex].Cells[0].Value.ToString());
             txtRoleName.Text = ugRoleList.Rows[e.RowIndex].Cells[1].Value.ToString();
 
         }
-
-        private void btnDeleteDesig_Click(object sender, EventArgs e)
+        private void ugDepartments_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-
-        }
-
-        private void btnDeleteDepart_Click(object sender, EventArgs e)
-        {
-
+            btnDeleteDepart.Enabled= true;
+            btnUpdateDepart.Enabled = true;
+            btnAddDepartment.Enabled = false;   
+            departmentId = Convert.ToInt32(ugDepartments.Rows[e.RowIndex].Cells[0].Value.ToString());
+            txtDepartmentName.Text = ugDepartments.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtDeptDescription.Text = ugDepartments.Rows[e.RowIndex].Cells[2].Value.ToString();
         }
     }
 }

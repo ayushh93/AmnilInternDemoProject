@@ -288,6 +288,7 @@ namespace ItemsApp
                         conn.Close();
                         btnCancel.PerformClick();
                         MessageBox.Show($"User {name} updated!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        showData();
                     }
                 }
             }

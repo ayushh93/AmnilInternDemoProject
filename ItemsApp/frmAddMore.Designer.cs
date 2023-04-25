@@ -109,10 +109,12 @@
             // 
             // ugRoleList
             // 
+            this.ugRoleList.AllowUserToAddRows = false;
             this.ugRoleList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ugRoleList.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ugRoleList.Location = new System.Drawing.Point(3, 211);
             this.ugRoleList.Name = "ugRoleList";
+            this.ugRoleList.ReadOnly = true;
             this.ugRoleList.RowHeadersWidth = 51;
             this.ugRoleList.RowTemplate.Height = 29;
             this.ugRoleList.Size = new System.Drawing.Size(849, 380);
@@ -121,15 +123,18 @@
             // 
             // btnUpdateRole
             // 
+            this.btnUpdateRole.Enabled = false;
             this.btnUpdateRole.Location = new System.Drawing.Point(732, 159);
             this.btnUpdateRole.Name = "btnUpdateRole";
             this.btnUpdateRole.Size = new System.Drawing.Size(94, 29);
             this.btnUpdateRole.TabIndex = 4;
             this.btnUpdateRole.Text = "Update";
             this.btnUpdateRole.UseVisualStyleBackColor = true;
+            this.btnUpdateRole.Click += new System.EventHandler(this.btnUpdateRole_Click);
             // 
             // btnDeleteRole
             // 
+            this.btnDeleteRole.Enabled = false;
             this.btnDeleteRole.Location = new System.Drawing.Point(594, 159);
             this.btnDeleteRole.Name = "btnDeleteRole";
             this.btnDeleteRole.Size = new System.Drawing.Size(94, 29);
@@ -192,17 +197,21 @@
             this.btnClearDepart.TabIndex = 13;
             this.btnClearDepart.Text = "Clear";
             this.btnClearDepart.UseVisualStyleBackColor = true;
+            this.btnClearDepart.Click += new System.EventHandler(this.btnClearDepart_Click);
             // 
             // ugDepartments
             // 
+            this.ugDepartments.AllowUserToAddRows = false;
             this.ugDepartments.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ugDepartments.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.ugDepartments.Location = new System.Drawing.Point(3, 403);
             this.ugDepartments.Name = "ugDepartments";
+            this.ugDepartments.ReadOnly = true;
             this.ugDepartments.RowHeadersWidth = 51;
             this.ugDepartments.RowTemplate.Height = 29;
             this.ugDepartments.Size = new System.Drawing.Size(849, 188);
             this.ugDepartments.TabIndex = 12;
+            this.ugDepartments.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ugDepartments_CellContentDoubleClick);
             // 
             // txtDeptDescription
             // 
@@ -224,15 +233,18 @@
             // 
             // btnUpdateDepart
             // 
+            this.btnUpdateDepart.Enabled = false;
             this.btnUpdateDepart.Location = new System.Drawing.Point(403, 242);
             this.btnUpdateDepart.Name = "btnUpdateDepart";
             this.btnUpdateDepart.Size = new System.Drawing.Size(94, 29);
             this.btnUpdateDepart.TabIndex = 9;
             this.btnUpdateDepart.Text = "Update";
             this.btnUpdateDepart.UseVisualStyleBackColor = true;
+            this.btnUpdateDepart.Click += new System.EventHandler(this.btnUpdateDepart_Click);
             // 
             // btnDeleteDepart
             // 
+            this.btnDeleteDepart.Enabled = false;
             this.btnDeleteDepart.Location = new System.Drawing.Point(258, 242);
             this.btnDeleteDepart.Name = "btnDeleteDepart";
             this.btnDeleteDepart.Size = new System.Drawing.Size(94, 29);
